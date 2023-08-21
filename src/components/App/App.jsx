@@ -1,5 +1,4 @@
-import React from 'react';
-import { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import AddingForm from '../AddingForm/AddingForm';
 import { ContactList } from '../ContactList/ContactList';
 import { Filter } from '../Filter/Filter';
@@ -17,30 +16,30 @@ import {
 } from './App.styled';
 import { nanoid } from 'nanoid';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-  };
+const savedContacts = JSON.parse(localStorage.getItem('saved-contacts'));
 
-  componentDidMount() {
-    const savedContacts = localStorage.getItem('saved-contacts');
-    if (savedContacts !== null) {
-      this.setState({ contacts: JSON.parse(savedContacts) });
+export const App = () => {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    try {
+      if (savedContacts === null) return;
+      setContacts(savedContacts);
+    } catch (error) {
+      toast.error(`Error while parsing saved contacts`, {
+        autoClose: 2000,
+      });
+      console.log(error);
     }
-  }
+  }, []);
 
-  componentDidUpdate(nextProps, nextState) {
-    if (this.state.contacts !== nextState.contacts) {
-      localStorage.setItem(
-        'saved-contacts',
-        JSON.stringify(this.state.contacts)
-      );
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('saved-contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  addContact = newContact => {
-    const oldContact = this.state.contacts.find(
+  const addContact = newContact => {
+    const oldContact = contacts.find(
       contact =>
         contact.name.toLowerCase() === newContact.name.toLowerCase() ||
         contact.number === newContact.number
@@ -48,75 +47,68 @@ export class App extends Component {
 
     if (oldContact) {
       toast.error(`${oldContact.name} already exists`, {
-        autoClose: 3000,
+        autoClose: 2000,
       });
       return;
     }
 
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, { ...newContact, id: nanoid() }],
-    }));
+    setContacts(prevContacts => [
+      ...prevContacts,
+      { ...newContact, id: nanoid() },
+    ]);
 
     toast.success('Contact added successfully', {
       position: 'top-right',
-      autoClose: 3000,
+      autoClose: 2000,
     });
   };
 
-  findContact = event => {
+  const findContact = event => {
     const searchName = event.currentTarget.value.toLowerCase();
-    this.setState({ filter: searchName });
+    setFilter(searchName);
   };
 
-  clearInput = () => {
-    this.setState({
-      filter: '',
-    });
+  const clearInput = () => {
+    setFilter('');
   };
 
-  showNewList = () => {
-    const { contacts, filter } = this.state;
+  const showNewList = () => {
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter)
     );
   };
 
-  removeContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  const removeContact = contactId => {
+    setContacts(prevContacts => {
+      return prevContacts.filter(contact => contact.id !== contactId);
+    });
   };
 
-  render() {
-    const { filter } = this.state;
-    const newList = this.showNewList();
-
-    return (
-      <Container>
-        <TitleWrapper>
-          <Title>Phonebook</Title> <RiContactsBookLine size={40} color="#fff" />
-        </TitleWrapper>
-        <Wrapper>
-          <SearchSection>
-            <Filter
-              clearInput={this.clearInput}
-              filter={filter}
-              findContact={this.findContact}
-            />
-            /
-            <AddingForm addContact={this.addContact} />/
-          </SearchSection>
-          <ContactsSection>
-            <SubTitle>Contacts</SubTitle>
-            <ContactList
-              filter={filter}
-              newList={newList}
-              removeContact={this.removeContact}
-            />
-            <ToastContainer />
-          </ContactsSection>
-        </Wrapper>
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <TitleWrapper>
+        <Title>Phonebook</Title> <RiContactsBookLine size={40} color="#fff" />
+      </TitleWrapper>
+      <Wrapper>
+        <SearchSection>
+          <Filter
+            clearInput={clearInput}
+            filter={filter}
+            findContact={findContact}
+          />
+          /
+          <AddingForm addContact={addContact} />/
+        </SearchSection>
+        <ContactsSection>
+          <SubTitle>Contacts</SubTitle>
+          <ContactList
+            filter={filter}
+            newList={showNewList()}
+            removeContact={removeContact}
+          />
+          <ToastContainer />
+        </ContactsSection>
+      </Wrapper>
+    </Container>
+  );
+};
