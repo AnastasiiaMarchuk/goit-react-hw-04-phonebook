@@ -16,23 +16,13 @@ import {
 } from './App.styled';
 import { nanoid } from 'nanoid';
 
-const savedContacts = JSON.parse(localStorage.getItem('saved-contacts'));
+// const savedContacts = JSON.parse(localStorage.getItem('saved-contacts'));
 
 export const App = () => {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(localStorage.getItem('saved-contacts')) ?? []
+  );
   const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    try {
-      if (savedContacts === null) return;
-      setContacts(savedContacts);
-    } catch (error) {
-      toast.error(`Error while parsing saved contacts`, {
-        autoClose: 2000,
-      });
-      console.log(error);
-    }
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('saved-contacts', JSON.stringify(contacts));

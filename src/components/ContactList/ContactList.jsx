@@ -48,36 +48,4 @@ export const ContactList = ({ filter, newList, removeContact }) => {
   );
 };
 
-// export const ContactList = ({ newList, removeContact }) => {
-//   return (
-//     <>
-//       <LineWithShadow />
-//       <TitlesWrapper>
-//         <Title>Name</Title>
-//         <Title>Number</Title>
-//       </TitlesWrapper>
-//       <LineWithShadow />
-//       {newList.length > 0 ? (
-//         <List>
-//           {newList.map(contact => {
-//             return (
-//               <Item key={contact.id}>
-//                 <BsPersonCircle size={21} color="#fff" />
-//                 <Name>{contact.name}</Name>
-//                 <Number>{contact.number}</Number>
-//                 <Button onClick={() => removeContact(contact.id)}>
-//                   <FiTrash size={21} />
-//                 </Button>
-//               </Item>
-//             );
-//           })}
-//         </List>
-//       ) : (
-//         <TextMessage>
-//           There are no entries in your phone book yet. It's time to add your
-//           first contact
-//         </TextMessage>
-//       )}
-//     </>
-//   );
-// };
+
